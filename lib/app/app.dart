@@ -56,7 +56,7 @@ class _BottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           border: const Border(top: BorderSide(color: AppColors.border)),
           boxShadow: [
             BoxShadow(
