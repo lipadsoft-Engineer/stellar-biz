@@ -22,13 +22,15 @@ lib/
 
 Feature code is organized into `data/`, `domain/`, and `presentation/` as it is implemented. Shared concerns live under `core/`.
 
+The app uses `go_router` for tab navigation and Riverpod for dependency and UI state management.
+
 ## Development roadmap
 
 ### Phase 1 — Foundation
 - [x] Create the Flutter project and install dependencies.
 - [x] Implement the app theme and reusable UI components.
 - [x] Build the main navigation and placeholder screens.
-- [ ] Configure routing and state management.
+- [x] Configure routing and state management.
 
 ### Phase 2 — Local Database
 - [ ] Configure SQLite and Drift.
