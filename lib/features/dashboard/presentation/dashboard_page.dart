@@ -6,39 +6,55 @@ class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context) => ListView(
-        padding: const EdgeInsets.fromLTRB(22, 18, 22, 28),
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final weekdays = const [
+      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    ];
+    final months = const [
+      'January', 'February', 'March', 'April', 'May', 'June', 'July',
+      'August', 'September', 'October', 'November', 'December'
+    ];
+    final greeting = now.hour < 12
+        ? 'Good morning'
+        : now.hour < 17
+            ? 'Good afternoon'
+            : 'Good evening';
+
+    return ListView(
+        padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('THURSDAY, NOVEMBER 5',
-                        style: TextStyle(
+                    Text(
+                        '${weekdays[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}',
+                        style: const TextStyle(
                             color: AppColors.muted,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            letterSpacing: 1.1)),
-                    SizedBox(height: 6),
-                    Text('Good morning,', style: _greeting),
-                    Text('your business is blooming 🌷',
+                            letterSpacing: 1.05)),
+                    const SizedBox(height: 7),
+                    Text(greeting, style: _greeting),
+                    const SizedBox(height: 3),
+                    const Text('Your business, at a glance',
                         style: TextStyle(
-                            color: AppColors.rose,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            height: 1.22,
-                            letterSpacing: -0.35)),
+                            color: AppColors.muted,
+                            fontSize: 13,
+                            height: 1.35)),
                   ],
                 ),
               ),
               Container(
-                width: 46,
-                height: 46,
+                width: 44,
+                height: 44,
                 decoration: const BoxDecoration(
                     color: AppColors.roseLight, shape: BoxShape.circle),
-                child: const Icon(Icons.spa_outlined, color: AppColors.rose),
+                child: const Icon(Icons.auto_awesome,
+                    color: AppColors.rose, size: 19),
               ),
             ],
           ),
@@ -114,15 +130,15 @@ class DashboardPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-                color: const Color(0xFFF5EFE9),
-                borderRadius: BorderRadius.circular(20)),
+                color: const Color(0xFFF1EEE8),
+                borderRadius: BorderRadius.circular(18)),
             child: Row(
               children: [
                 const Icon(Icons.lightbulb_outline, color: AppColors.rose),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Small steps add up. Remember to log today’s expenses.',
+                    'A quick reminder to record any expenses from today.',
                     style: TextStyle(
                         color: AppColors.ink.withValues(alpha: .8),
                         height: 1.4,
@@ -134,11 +150,12 @@ class DashboardPage extends StatelessWidget {
           ),
         ],
       );
+  }
 }
 
 const _greeting = TextStyle(
     color: AppColors.ink,
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: FontWeight.w700,
     height: 1.22,
     letterSpacing: -0.35);
@@ -154,16 +171,16 @@ class _ProfitCard extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(21, 20, 21, 18),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFFB95F78), Color(0xFFA84F6C)],
+            colors: [AppColors.plum, AppColors.plumDeep],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(23),
           boxShadow: [
             BoxShadow(
-                color: AppColors.rose.withValues(alpha: .20),
-                blurRadius: 20,
-                offset: const Offset(0, 9)),
+                color: AppColors.plum.withValues(alpha: .15),
+                blurRadius: 18,
+                offset: const Offset(0, 8)),
           ],
         ),
         child: Column(
@@ -183,11 +200,12 @@ class _ProfitCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: .16),
+                      color: Colors.white.withValues(alpha: .12),
                       borderRadius: BorderRadius.circular(20)),
                   child: const Row(
                     children: [
-                      Icon(Icons.trending_up, color: Colors.white, size: 14),
+                      Icon(Icons.calendar_today_outlined,
+                          color: Color(0xFFE4CCD7), size: 12),
                       SizedBox(width: 4),
                       Text('Today',
                           style: TextStyle(color: Colors.white, fontSize: 11)),
@@ -204,7 +222,7 @@ class _ProfitCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     letterSpacing: -1)),
             const SizedBox(height: 5),
-            const Text('A lovely start to the day ✨',
+            const Text('A clear view of where you stand',
                 style: TextStyle(color: Colors.white70, fontSize: 12)),
             const SizedBox(height: 18),
             Container(height: 1, color: Colors.white.withValues(alpha: .22)),
@@ -260,7 +278,7 @@ class _MetricCard extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: AppColors.border)),
         child: Column(
@@ -305,7 +323,7 @@ class _WeekChart extends StatelessWidget {
         height: 184,
         padding: const EdgeInsets.fromLTRB(16, 17, 16, 13),
         decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(color: AppColors.border)),
         child: Row(
@@ -330,7 +348,7 @@ class _WeekChart extends StatelessWidget {
                     decoration: BoxDecoration(
                         color: active
                             ? AppColors.rose
-                            : const Color(0xFFF0DCE2),
+                            : AppColors.roseLight,
                         borderRadius: BorderRadius.circular(9)),
                   ),
                   const SizedBox(height: 9),
@@ -361,7 +379,7 @@ class _ActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
           onTap: onTap,
