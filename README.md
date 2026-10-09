@@ -35,7 +35,7 @@ The app uses `go_router` for tab navigation and Riverpod for dependency and UI s
 ### Phase 2 — Local Database
 - [x] Configure SQLite and Drift.
 - [x] Define product, sale, sale-item, expense, payment, and inventory-movement tables.
-- [ ] Implement database migrations and transaction handling.
+- [x] Implement database migrations and transaction handling.
 - [ ] Add tests for core accounting calculations.
 
 ### Phase 3 — Core Features
