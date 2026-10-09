@@ -36,7 +36,7 @@ The app uses `go_router` for tab navigation and Riverpod for dependency and UI s
 - [x] Configure SQLite and Drift.
 - [x] Define product, sale, sale-item, expense, payment, and inventory-movement tables.
 - [x] Implement database migrations and transaction handling.
-- [ ] Add tests for core accounting calculations.
+- [x] Add tests for core accounting calculations.
 
 ### Phase 3 — Core Features
 - [ ] Implement product management.
