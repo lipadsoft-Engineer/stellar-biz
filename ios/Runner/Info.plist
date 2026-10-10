@@ -16,6 +16,10 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>sole_proprietor</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Take product photos to identify your stock.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Choose product photos to identify your stock.</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
