@@ -40,7 +40,7 @@ The app uses `go_router` for tab navigation and Riverpod for dependency and UI s
 
 ### Phase 3 — Core Features
 - [x] Implement product management.
-- [ ] Implement inventory tracking and stock adjustments.
+- [x] Implement inventory tracking and stock adjustments.
 - [ ] Implement sales recording and payment tracking.
 - [ ] Implement expense management.
 - [ ] Implement notes.
