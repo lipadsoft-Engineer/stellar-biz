@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/dashboard/presentation/dashboard_page.dart';
+import '../features/products/presentation/products_page.dart';
 import 'theme.dart';
 
 enum AppDestination { home, products, record, notes, settings }
@@ -80,7 +81,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 Widget _destinationPage(AppDestination destination) =>
     destination == AppDestination.home
         ? const DashboardPage()
-        : _PlaceholderPage(destination: destination);
+        : destination == AppDestination.products
+            ? const ProductsPage()
+            : _PlaceholderPage(destination: destination);
 
 class _AppShell extends StatelessWidget {
   const _AppShell({required this.navigationShell});
