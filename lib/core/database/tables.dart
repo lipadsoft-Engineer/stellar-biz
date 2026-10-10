@@ -8,6 +8,7 @@ class Products extends Table {
   TextColumn get name => text()();
   TextColumn get sku => text().nullable().unique()();
   TextColumn get category => text().nullable()();
+  TextColumn get imagePath => text().nullable()();
   IntColumn get unitCostMinor => integer()();
   IntColumn get sellingPriceMinor => integer()();
   IntColumn get stockQuantity => integer().withDefault(const Constant(0))();
@@ -29,7 +30,8 @@ class Sales extends Table {
   IntColumn get discountMinor => integer().withDefault(const Constant(0))();
   IntColumn get totalMinor => integer()();
   IntColumn get amountPaidMinor => integer().withDefault(const Constant(0))();
-  TextColumn get paymentStatus => text().withDefault(const Constant('unpaid'))();
+  TextColumn get paymentStatus =>
+      text().withDefault(const Constant('unpaid'))();
   TextColumn get paymentMethod => text().nullable()();
   DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
 }
@@ -86,8 +88,11 @@ class InventoryMovements extends Table {
       integer().references(Products, #id, onDelete: KeyAction.restrict)();
   IntColumn get quantityDelta => integer()();
   TextColumn get movementType => text()();
-  IntColumn get saleId =>
-      integer().nullable().references(Sales, #id, onDelete: KeyAction.restrict)();
+  IntColumn get saleId => integer().nullable().references(
+    Sales,
+    #id,
+    onDelete: KeyAction.restrict,
+  )();
   TextColumn get reason => text().nullable()();
   DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
 }
