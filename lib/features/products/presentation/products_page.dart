@@ -4,11 +4,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/utils/money.dart';
+import '../../inventory/presentation/stock_adjustment_sheet.dart';
+import '../../inventory/presentation/stock_history_sheet.dart';
 import '../data/product_repository.dart';
 import '../domain/product_draft.dart';
 import 'product_form_sheet.dart';
 
-enum _ProductAction { edit, archive, restore, delete }
+enum _ProductAction {
+  edit,
+  adjustStock,
+  stockHistory,
+  archive,
+  restore,
+  delete,
+}
 
 class ProductsPage extends ConsumerStatefulWidget {
   const ProductsPage({super.key});
@@ -208,10 +217,40 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
     if (saved == true && mounted) _showMessage('Product updated.');
   }
 
+  Future<void> _adjustStock(Product product) async {
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: AppColors.cream,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => StockAdjustmentSheet(product: product),
+    );
+    if (saved == true && mounted) _showMessage('Stock updated.');
+  }
+
+  Future<void> _showStockHistory(Product product) => showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    backgroundColor: AppColors.cream,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (context) =>
+        StockHistorySheet(productId: product.id, productName: product.name),
+  );
+
   Future<void> _handleAction(Product product, _ProductAction action) async {
     switch (action) {
       case _ProductAction.edit:
         await _editProduct(product);
+      case _ProductAction.adjustStock:
+        await _adjustStock(product);
+      case _ProductAction.stockHistory:
+        await _showStockHistory(product);
       case _ProductAction.archive:
         await _runAction(
           () => ref
@@ -348,6 +387,15 @@ class _ProductCard extends StatelessWidget {
                     const PopupMenuItem(
                       value: _ProductAction.edit,
                       child: Text('Edit'),
+                    ),
+                    if (!product.isArchived)
+                      const PopupMenuItem(
+                        value: _ProductAction.adjustStock,
+                        child: Text('Adjust stock'),
+                      ),
+                    const PopupMenuItem(
+                      value: _ProductAction.stockHistory,
+                      child: Text('Stock history'),
                     ),
                     PopupMenuItem(
                       value: product.isArchived
