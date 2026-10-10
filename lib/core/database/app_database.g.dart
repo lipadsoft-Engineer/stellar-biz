@@ -51,6 +51,17 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _imagePathMeta = const VerificationMeta(
+    'imagePath',
+  );
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+    'image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _unitCostMinorMeta = const VerificationMeta(
     'unitCostMinor',
   );
@@ -141,6 +152,7 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     name,
     sku,
     category,
+    imagePath,
     unitCostMinor,
     sellingPriceMinor,
     stockQuantity,
@@ -182,6 +194,12 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
       context.handle(
         _categoryMeta,
         category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(
+        _imagePathMeta,
+        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
       );
     }
     if (data.containsKey('unit_cost_minor')) {
@@ -267,6 +285,10 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         DriftSqlType.string,
         data['${effectivePrefix}category'],
       ),
+      imagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_path'],
+      ),
       unitCostMinor: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}unit_cost_minor'],
@@ -309,6 +331,7 @@ class Product extends DataClass implements Insertable<Product> {
   final String name;
   final String? sku;
   final String? category;
+  final String? imagePath;
   final int unitCostMinor;
   final int sellingPriceMinor;
   final int stockQuantity;
@@ -321,6 +344,7 @@ class Product extends DataClass implements Insertable<Product> {
     required this.name,
     this.sku,
     this.category,
+    this.imagePath,
     required this.unitCostMinor,
     required this.sellingPriceMinor,
     required this.stockQuantity,
@@ -339,6 +363,9 @@ class Product extends DataClass implements Insertable<Product> {
     }
     if (!nullToAbsent || category != null) {
       map['category'] = Variable<String>(category);
+    }
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
     }
     map['unit_cost_minor'] = Variable<int>(unitCostMinor);
     map['selling_price_minor'] = Variable<int>(sellingPriceMinor);
@@ -360,6 +387,9 @@ class Product extends DataClass implements Insertable<Product> {
       category: category == null && nullToAbsent
           ? const Value.absent()
           : Value(category),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
       unitCostMinor: Value(unitCostMinor),
       sellingPriceMinor: Value(sellingPriceMinor),
       stockQuantity: Value(stockQuantity),
@@ -382,6 +412,7 @@ class Product extends DataClass implements Insertable<Product> {
       name: serializer.fromJson<String>(json['name']),
       sku: serializer.fromJson<String?>(json['sku']),
       category: serializer.fromJson<String?>(json['category']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
       unitCostMinor: serializer.fromJson<int>(json['unitCostMinor']),
       sellingPriceMinor: serializer.fromJson<int>(json['sellingPriceMinor']),
       stockQuantity: serializer.fromJson<int>(json['stockQuantity']),
@@ -399,6 +430,7 @@ class Product extends DataClass implements Insertable<Product> {
       'name': serializer.toJson<String>(name),
       'sku': serializer.toJson<String?>(sku),
       'category': serializer.toJson<String?>(category),
+      'imagePath': serializer.toJson<String?>(imagePath),
       'unitCostMinor': serializer.toJson<int>(unitCostMinor),
       'sellingPriceMinor': serializer.toJson<int>(sellingPriceMinor),
       'stockQuantity': serializer.toJson<int>(stockQuantity),
@@ -414,6 +446,7 @@ class Product extends DataClass implements Insertable<Product> {
     String? name,
     Value<String?> sku = const Value.absent(),
     Value<String?> category = const Value.absent(),
+    Value<String?> imagePath = const Value.absent(),
     int? unitCostMinor,
     int? sellingPriceMinor,
     int? stockQuantity,
@@ -426,6 +459,7 @@ class Product extends DataClass implements Insertable<Product> {
     name: name ?? this.name,
     sku: sku.present ? sku.value : this.sku,
     category: category.present ? category.value : this.category,
+    imagePath: imagePath.present ? imagePath.value : this.imagePath,
     unitCostMinor: unitCostMinor ?? this.unitCostMinor,
     sellingPriceMinor: sellingPriceMinor ?? this.sellingPriceMinor,
     stockQuantity: stockQuantity ?? this.stockQuantity,
@@ -442,6 +476,7 @@ class Product extends DataClass implements Insertable<Product> {
       name: data.name.present ? data.name.value : this.name,
       sku: data.sku.present ? data.sku.value : this.sku,
       category: data.category.present ? data.category.value : this.category,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       unitCostMinor: data.unitCostMinor.present
           ? data.unitCostMinor.value
           : this.unitCostMinor,
@@ -469,6 +504,7 @@ class Product extends DataClass implements Insertable<Product> {
           ..write('name: $name, ')
           ..write('sku: $sku, ')
           ..write('category: $category, ')
+          ..write('imagePath: $imagePath, ')
           ..write('unitCostMinor: $unitCostMinor, ')
           ..write('sellingPriceMinor: $sellingPriceMinor, ')
           ..write('stockQuantity: $stockQuantity, ')
@@ -486,6 +522,7 @@ class Product extends DataClass implements Insertable<Product> {
     name,
     sku,
     category,
+    imagePath,
     unitCostMinor,
     sellingPriceMinor,
     stockQuantity,
@@ -502,6 +539,7 @@ class Product extends DataClass implements Insertable<Product> {
           other.name == this.name &&
           other.sku == this.sku &&
           other.category == this.category &&
+          other.imagePath == this.imagePath &&
           other.unitCostMinor == this.unitCostMinor &&
           other.sellingPriceMinor == this.sellingPriceMinor &&
           other.stockQuantity == this.stockQuantity &&
@@ -516,6 +554,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
   final Value<String> name;
   final Value<String?> sku;
   final Value<String?> category;
+  final Value<String?> imagePath;
   final Value<int> unitCostMinor;
   final Value<int> sellingPriceMinor;
   final Value<int> stockQuantity;
@@ -528,6 +567,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     this.name = const Value.absent(),
     this.sku = const Value.absent(),
     this.category = const Value.absent(),
+    this.imagePath = const Value.absent(),
     this.unitCostMinor = const Value.absent(),
     this.sellingPriceMinor = const Value.absent(),
     this.stockQuantity = const Value.absent(),
@@ -541,6 +581,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     required String name,
     this.sku = const Value.absent(),
     this.category = const Value.absent(),
+    this.imagePath = const Value.absent(),
     required int unitCostMinor,
     required int sellingPriceMinor,
     this.stockQuantity = const Value.absent(),
@@ -556,6 +597,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Expression<String>? name,
     Expression<String>? sku,
     Expression<String>? category,
+    Expression<String>? imagePath,
     Expression<int>? unitCostMinor,
     Expression<int>? sellingPriceMinor,
     Expression<int>? stockQuantity,
@@ -569,6 +611,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       if (name != null) 'name': name,
       if (sku != null) 'sku': sku,
       if (category != null) 'category': category,
+      if (imagePath != null) 'image_path': imagePath,
       if (unitCostMinor != null) 'unit_cost_minor': unitCostMinor,
       if (sellingPriceMinor != null) 'selling_price_minor': sellingPriceMinor,
       if (stockQuantity != null) 'stock_quantity': stockQuantity,
@@ -584,6 +627,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Value<String>? name,
     Value<String?>? sku,
     Value<String?>? category,
+    Value<String?>? imagePath,
     Value<int>? unitCostMinor,
     Value<int>? sellingPriceMinor,
     Value<int>? stockQuantity,
@@ -597,6 +641,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       name: name ?? this.name,
       sku: sku ?? this.sku,
       category: category ?? this.category,
+      imagePath: imagePath ?? this.imagePath,
       unitCostMinor: unitCostMinor ?? this.unitCostMinor,
       sellingPriceMinor: sellingPriceMinor ?? this.sellingPriceMinor,
       stockQuantity: stockQuantity ?? this.stockQuantity,
@@ -621,6 +666,9 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     }
     if (category.present) {
       map['category'] = Variable<String>(category.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
     }
     if (unitCostMinor.present) {
       map['unit_cost_minor'] = Variable<int>(unitCostMinor.value);
@@ -653,6 +701,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
           ..write('name: $name, ')
           ..write('sku: $sku, ')
           ..write('category: $category, ')
+          ..write('imagePath: $imagePath, ')
           ..write('unitCostMinor: $unitCostMinor, ')
           ..write('sellingPriceMinor: $sellingPriceMinor, ')
           ..write('stockQuantity: $stockQuantity, ')
@@ -3183,6 +3232,7 @@ typedef $$ProductsTableCreateCompanionBuilder = ProductsCompanion Function({
   required String name,
   Value<String?> sku,
   Value<String?> category,
+  Value<String?> imagePath,
   required int unitCostMinor,
   required int sellingPriceMinor,
   Value<int> stockQuantity,
@@ -3196,6 +3246,7 @@ typedef $$ProductsTableUpdateCompanionBuilder = ProductsCompanion Function({
   Value<String> name,
   Value<String?> sku,
   Value<String?> category,
+  Value<String?> imagePath,
   Value<int> unitCostMinor,
   Value<int> sellingPriceMinor,
   Value<int> stockQuantity,
@@ -3275,6 +3326,11 @@ class $$ProductsTableFilterComposer
 
   ColumnFilters<String> get category => $composableBuilder(
     column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3393,6 +3449,11 @@ class $$ProductsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get unitCostMinor => $composableBuilder(
     column: $table.unitCostMinor,
     builder: (column) => ColumnOrderings(column),
@@ -3449,6 +3510,9 @@ class $$ProductsTableAnnotationComposer
 
   GeneratedColumn<String> get category =>
       $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
 
   GeneratedColumn<int> get unitCostMinor => $composableBuilder(
     column: $table.unitCostMinor,
@@ -3568,6 +3632,7 @@ class $$ProductsTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String?> sku = const Value.absent(),
                 Value<String?> category = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
                 Value<int> unitCostMinor = const Value.absent(),
                 Value<int> sellingPriceMinor = const Value.absent(),
                 Value<int> stockQuantity = const Value.absent(),
@@ -3580,6 +3645,7 @@ class $$ProductsTableTableManager
                 name: name,
                 sku: sku,
                 category: category,
+                imagePath: imagePath,
                 unitCostMinor: unitCostMinor,
                 sellingPriceMinor: sellingPriceMinor,
                 stockQuantity: stockQuantity,
@@ -3594,6 +3660,7 @@ class $$ProductsTableTableManager
                 required String name,
                 Value<String?> sku = const Value.absent(),
                 Value<String?> category = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
                 required int unitCostMinor,
                 required int sellingPriceMinor,
                 Value<int> stockQuantity = const Value.absent(),
@@ -3606,6 +3673,7 @@ class $$ProductsTableTableManager
                 name: name,
                 sku: sku,
                 category: category,
+                imagePath: imagePath,
                 unitCostMinor: unitCostMinor,
                 sellingPriceMinor: sellingPriceMinor,
                 stockQuantity: stockQuantity,
