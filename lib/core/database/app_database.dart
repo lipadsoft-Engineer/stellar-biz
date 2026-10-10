@@ -12,20 +12,22 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'petal_ledger'));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (migrator) async {
-          await migrator.createAll();
-        },
-        onUpgrade: (migrator, from, to) async {
-          if (from < 2) {
-            await transaction(migrator.createAll);
-          }
-        },
-        beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
-      );
+    onCreate: (migrator) async {
+      await migrator.createAll();
+    },
+    onUpgrade: (migrator, from, to) async {
+      if (from < 2) {
+        await transaction(migrator.createAll);
+      } else if (from < 3) {
+        await migrator.addColumn(products, products.imagePath);
+      }
+    },
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
 }
