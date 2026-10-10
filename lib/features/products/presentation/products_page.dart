@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/utils/product_image_storage.dart';
 import '../../inventory/presentation/stock_adjustment_sheet.dart';
 import '../../inventory/presentation/stock_history_sheet.dart';
 import '../data/product_repository.dart';
@@ -291,10 +294,14 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
       ),
     );
     if (confirmed != true) return;
-    await _runAction(
-      () => ref.read(productRepositoryProvider).deleteUnusedProduct(product.id),
-      'Product deleted.',
-    );
+    await _runAction(() async {
+      await ref.read(productRepositoryProvider).deleteUnusedProduct(product.id);
+      try {
+        await const ProductImageStorage().delete(product.imagePath);
+      } on FileSystemException {
+        // The database record is already gone; a stale photo is harmless.
+      }
+    }, 'Product deleted.');
   }
 
   Future<void> _runAction(
@@ -351,6 +358,39 @@ class _ProductCard extends StatelessWidget {
           children: [
             Row(
               children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: product.imagePath == null
+                        ? Container(
+                            color: AppColors.roseLight,
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              Icons.inventory_2_outlined,
+                              color: AppColors.rose,
+                              size: 21,
+                            ),
+                          )
+                        : Image.file(
+                            File(product.imagePath!),
+                            fit: BoxFit.cover,
+                            cacheWidth: 96,
+                            cacheHeight: 96,
+                            errorBuilder: (_, _, _) => Container(
+                              color: AppColors.roseLight,
+                              alignment: Alignment.center,
+                              child: const Icon(
+                                Icons.inventory_2_outlined,
+                                color: AppColors.rose,
+                                size: 21,
+                              ),
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 11),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
