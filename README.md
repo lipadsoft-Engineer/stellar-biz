@@ -69,6 +69,7 @@ The app uses `go_router` for tab navigation and Riverpod for dependency and UI s
 - No account or internet connection is required for the initial release.
 - Use integer minor currency units for financial calculations; default display currency is KES and should become configurable.
 - Keep historical sale prices and costs so later product edits do not rewrite past profit.
+- Product photos are resized before being stored privately on the device.
 - Profit is a management estimate from recorded transactions, not statutory accounting or tax advice.
 - Cloud sync, multiple users, barcode scanning, suppliers, and tax features are future options, not MVP requirements.
 
