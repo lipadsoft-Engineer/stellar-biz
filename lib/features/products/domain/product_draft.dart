@@ -6,12 +6,14 @@ final class ProductDraft {
     required this.initialStockQuantity,
     this.sku,
     this.category,
+    this.imagePath,
     this.lowStockThreshold,
   });
 
   final String name;
   final String? sku;
   final String? category;
+  final String? imagePath;
   final int unitCostMinor;
   final int sellingPriceMinor;
   final int initialStockQuantity;
