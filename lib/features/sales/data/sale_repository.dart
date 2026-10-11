@@ -10,10 +10,21 @@ final saleRepositoryProvider = Provider<SaleRepository>(
   (ref) => SaleRepository(ref.watch(appDatabaseProvider)),
 );
 
+final salesProvider = StreamProvider<List<Sale>>(
+  (ref) => ref.watch(saleRepositoryProvider).watchSales(),
+);
+
 class SaleRepository {
   const SaleRepository(this._database);
 
   final AppDatabase _database;
+
+  Stream<List<Sale>> watchSales() =>
+      (_database.select(_database.sales)..orderBy([
+            (sale) => OrderingTerm.desc(sale.transactionDate),
+            (sale) => OrderingTerm.desc(sale.id),
+          ]))
+          .watch();
 
   Future<int> recordSale(RecordSaleRequest request) {
     if (request.items.isEmpty) {
@@ -42,9 +53,9 @@ class SaleRepository {
       var subtotalMinor = 0;
 
       for (final entry in quantities.entries) {
-        final product = await (_database.select(_database.products)
-              ..where((row) => row.id.equals(entry.key)))
-            .getSingleOrNull();
+        final product = await (_database.select(
+          _database.products,
+        )..where((row) => row.id.equals(entry.key))).getSingleOrNull();
 
         if (product == null || product.isArchived) {
           throw const SaleValidationException(
@@ -83,10 +94,12 @@ class SaleRepository {
       final paymentStatus = request.amountPaidMinor == 0
           ? 'unpaid'
           : request.amountPaidMinor == totalMinor
-              ? 'paid'
-              : 'partial';
+          ? 'paid'
+          : 'partial';
 
-      final saleId = await _database.into(_database.sales).insert(
+      final saleId = await _database
+          .into(_database.sales)
+          .insert(
             SalesCompanion.insert(
               transactionDate: Value(transactionDate),
               status: const Value('completed'),
@@ -104,7 +117,9 @@ class SaleRepository {
         final quantity = line.quantity;
         final lineTotalMinor = product.sellingPriceMinor * quantity;
 
-        await _database.into(_database.saleItems).insert(
+        await _database
+            .into(_database.saleItems)
+            .insert(
               SaleItemsCompanion.insert(
                 saleId: saleId,
                 productId: product.id,
@@ -115,23 +130,28 @@ class SaleRepository {
               ),
             );
 
-        final updatedRows = await (_database.update(_database.products)
-              ..where((row) =>
-                  row.id.equals(product.id) &
-                  row.stockQuantity.isBiggerOrEqualValue(quantity)))
-            .write(
-          ProductsCompanion.custom(
-            stockQuantity: _database.products.stockQuantity - Constant(quantity),
-            updatedAt: Constant(DateTime.now()),
-          ),
-        );
+        final updatedRows =
+            await (_database.update(_database.products)..where(
+                  (row) =>
+                      row.id.equals(product.id) &
+                      row.stockQuantity.isBiggerOrEqualValue(quantity),
+                ))
+                .write(
+                  ProductsCompanion.custom(
+                    stockQuantity:
+                        _database.products.stockQuantity - Constant(quantity),
+                    updatedAt: Constant(DateTime.now()),
+                  ),
+                );
         if (updatedRows != 1) {
           throw SaleValidationException(
             'Stock changed while recording ${product.name}. Try again.',
           );
         }
 
-        await _database.into(_database.inventoryMovements).insert(
+        await _database
+            .into(_database.inventoryMovements)
+            .insert(
               InventoryMovementsCompanion.insert(
                 productId: product.id,
                 quantityDelta: -quantity,
@@ -142,7 +162,9 @@ class SaleRepository {
       }
 
       if (request.amountPaidMinor > 0) {
-        await _database.into(_database.payments).insert(
+        await _database
+            .into(_database.payments)
+            .insert(
               PaymentsCompanion.insert(
                 saleId: saleId,
                 amountMinor: request.amountPaidMinor,
@@ -153,6 +175,55 @@ class SaleRepository {
       }
 
       return saleId;
+    });
+  }
+
+  Future<void> recordPayment({
+    required int saleId,
+    required int amountMinor,
+    required String paymentMethod,
+  }) async {
+    if (amountMinor <= 0) {
+      throw const SaleValidationException('Enter a payment greater than zero.');
+    }
+    await _database.transaction(() async {
+      final sale = await (_database.select(
+        _database.sales,
+      )..where((row) => row.id.equals(saleId))).getSingleOrNull();
+      if (sale == null) {
+        throw const SaleValidationException('This sale no longer exists.');
+      }
+      final balance = sale.totalMinor - sale.amountPaidMinor;
+      if (amountMinor > balance) {
+        throw const SaleValidationException(
+          'Payment cannot exceed the remaining balance.',
+        );
+      }
+
+      final method = paymentMethod.trim();
+      await _database
+          .into(_database.payments)
+          .insert(
+            PaymentsCompanion.insert(
+              saleId: saleId,
+              amountMinor: amountMinor,
+              paymentMethod: Value(method.isEmpty ? null : method),
+            ),
+          );
+      final paid = sale.amountPaidMinor + amountMinor;
+      await (_database.update(
+        _database.sales,
+      )..where((row) => row.id.equals(saleId))).write(
+        SalesCompanion(
+          amountPaidMinor: Value(paid),
+          paymentStatus: Value(paid == sale.totalMinor ? 'paid' : 'partial'),
+          paymentMethod: Value(
+            sale.paymentMethod == null || sale.paymentMethod == method
+                ? method
+                : 'multiple',
+          ),
+        ),
+      );
     });
   }
 }
