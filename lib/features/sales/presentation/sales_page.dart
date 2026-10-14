@@ -5,16 +5,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/utils/money.dart';
+import '../../expenses/presentation/expenses_page.dart';
 import '../../products/data/product_repository.dart';
 import '../data/sale_repository.dart';
 import '../domain/record_sale_request.dart';
 import '../domain/sale_validation_exception.dart';
 
-class SalesPage extends ConsumerWidget {
+class SalesPage extends ConsumerStatefulWidget {
   const SalesPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SalesPage> createState() => _SalesPageState();
+}
+
+class _SalesPageState extends ConsumerState<SalesPage> {
+  bool _showExpenses = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showExpenses) {
+      return ExpensesPage(onBack: () => setState(() => _showExpenses = false));
+    }
     final products = ref.watch(productsProvider);
     final productList = products.asData?.value;
     final sales = ref.watch(salesProvider);
@@ -52,6 +63,13 @@ class SalesPage extends ConsumerWidget {
                     : () => _newSale(context, productList),
                 icon: const Icon(Icons.add_rounded, size: 18),
                 label: const Text('New sale'),
+              ),
+              const SizedBox(width: 2),
+              IconButton(
+                onPressed: () => setState(() => _showExpenses = true),
+                tooltip: 'Expenses',
+                icon: const Icon(Icons.receipt_long_outlined),
+                color: AppColors.plum,
               ),
             ],
           ),
