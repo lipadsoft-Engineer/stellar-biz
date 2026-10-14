@@ -42,7 +42,7 @@ The app uses `go_router` for tab navigation and Riverpod for dependency and UI s
 - [x] Implement product management.
 - [x] Implement inventory tracking and stock adjustments.
 - [x] Implement sales recording and payment tracking.
-- [ ] Implement expense management.
+- [x] Implement expense management.
 - [ ] Implement notes.
 
 ### Phase 4 — Dashboard and Reports
