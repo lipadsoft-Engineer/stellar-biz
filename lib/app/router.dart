@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/dashboard/presentation/dashboard_page.dart';
+import '../features/notes/presentation/notes_page.dart';
 import '../features/products/presentation/products_page.dart';
 import '../features/sales/presentation/sales_page.dart';
 import 'theme.dart';
@@ -85,6 +86,8 @@ Widget _destinationPage(AppDestination destination) =>
     ? const ProductsPage()
     : destination == AppDestination.record
     ? const SalesPage()
+    : destination == AppDestination.notes
+    ? const NotesPage()
     : _PlaceholderPage(destination: destination);
 
 class _AppShell extends StatelessWidget {
