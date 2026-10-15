@@ -96,3 +96,14 @@ class InventoryMovements extends Table {
   TextColumn get reason => text().nullable()();
   DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
 }
+
+class Notes extends Table {
+  @override
+  String get tableName => 'notes';
+
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get title => text().nullable()();
+  TextColumn get content => text()();
+  DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
+  DateTimeColumn get updatedAt => dateTime().clientDefault(DateTime.now)();
+}
