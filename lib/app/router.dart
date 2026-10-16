@@ -6,6 +6,7 @@ import '../features/dashboard/presentation/dashboard_page.dart';
 import '../features/notes/presentation/notes_page.dart';
 import '../features/products/presentation/products_page.dart';
 import '../features/sales/presentation/sales_page.dart';
+import '../features/settings/presentation/settings_page.dart';
 import 'theme.dart';
 
 enum AppDestination { home, products, record, notes, settings }
@@ -88,6 +89,8 @@ Widget _destinationPage(AppDestination destination) =>
     ? const SalesPage()
     : destination == AppDestination.notes
     ? const NotesPage()
+    : destination == AppDestination.settings
+    ? const SettingsPage()
     : _PlaceholderPage(destination: destination);
 
 class _AppShell extends StatelessWidget {
