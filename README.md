@@ -52,7 +52,7 @@ The app uses `go_router` for tab navigation and Riverpod for dependency and UI s
 - [x] Add CSV export.
 
 ### Phase 5 — Security and Reliability
-- [ ] Add optional app locking.
+- [x] Add optional app locking.
 - [ ] Implement backup and restore.
 - [ ] Add input validation and error handling.
 - [ ] Test transaction integrity and historical calculations.
