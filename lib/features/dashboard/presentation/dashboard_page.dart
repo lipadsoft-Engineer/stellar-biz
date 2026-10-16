@@ -1,263 +1,325 @@
+import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme.dart';
+import '../../../core/utils/money.dart';
+import '../../reports/data/daily_profit_repository.dart';
+import '../../reports/domain/profit_calculator.dart';
 
-class DashboardPage extends StatelessWidget {
+enum _ProfitRange { today, week, month, custom }
+
+class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
 
   @override
+  ConsumerState<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends ConsumerState<DashboardPage> {
+  _ProfitRange _range = _ProfitRange.today;
+  DateTimeRange? _customRange;
+
+  @override
   Widget build(BuildContext context) {
+    final range = _selectedRange;
+    final report = ref.watch(
+      dailyProfitsProvider(ProfitDateRange(start: range.start, end: range.end)),
+    );
     final now = DateTime.now();
-    final weekdays = const [
-      'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
-    ];
-    final months = const [
-      'January', 'February', 'March', 'April', 'May', 'June', 'July',
-      'August', 'September', 'October', 'November', 'December'
-    ];
     final greeting = now.hour < 12
         ? 'Good morning'
         : now.hour < 17
-            ? 'Good afternoon'
-            : 'Good evening';
+        ? 'Good afternoon'
+        : 'Good evening';
 
     return ListView(
-        padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                        '${weekdays[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}',
-                        style: const TextStyle(
-                            color: AppColors.muted,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.05)),
-                    const SizedBox(height: 7),
-                    Text(greeting, style: _greeting),
-                    const SizedBox(height: 3),
-                    const Text('Your business, at a glance',
-                        style: TextStyle(
-                            color: AppColors.muted,
-                            fontSize: 13,
-                            height: 1.35)),
-                  ],
-                ),
-              ),
-              Container(
-                width: 44,
-                height: 44,
-                decoration: const BoxDecoration(
-                    color: AppColors.roseLight, shape: BoxShape.circle),
-                child: const Icon(Icons.auto_awesome,
-                    color: AppColors.rose, size: 19),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          const _ProfitCard(),
-          const SizedBox(height: 18),
-          const Row(
-            children: [
-              Expanded(
-                  child: _MetricCard(
-                      label: 'Sales today',
-                      value: 'KES 8,450',
-                      icon: Icons.south_west_rounded,
-                      tint: AppColors.sageLight,
-                      iconColor: AppColors.sage)),
-              SizedBox(width: 12),
-              Expanded(
-                  child: _MetricCard(
-                      label: 'Expenses',
-                      value: 'KES 1,200',
-                      icon: Icons.north_east_rounded,
-                      tint: AppColors.roseLight,
-                      iconColor: AppColors.rose)),
-            ],
-          ),
-          const SizedBox(height: 27),
-          Row(
-            children: [
-              const Expanded(child: Text('Profit at a glance', style: _section)),
-              TextButton.icon(
-                onPressed: () => _showComingSoon(context, 'Date range reports'),
-                icon: const Icon(Icons.calendar_month_outlined, size: 17),
-                label: const Text('This week'),
-                style: TextButton.styleFrom(foregroundColor: AppColors.rose),
-              ),
-            ],
-          ),
-          const SizedBox(height: 9),
-          const _WeekChart(),
-          const SizedBox(height: 25),
-          Row(
-            children: [
-              const Expanded(child: Text('Quick actions', style: _section)),
-              const Text('A little progress, every day', style: _caption),
-            ],
-          ),
-          const SizedBox(height: 13),
-          Row(
-            children: [
-              Expanded(
-                  child: _ActionTile(
-                      icon: Icons.add_shopping_cart_rounded,
-                      title: 'Record a sale',
-                      color: AppColors.rose,
-                      onTap: () => _showComingSoon(context, 'Sales'))),
-              const SizedBox(width: 12),
-              Expanded(
-                  child: _ActionTile(
-                      icon: Icons.inventory_2_outlined,
-                      title: 'Add a product',
-                      color: AppColors.sage,
-                      onTap: () => _showComingSoon(context, 'Products'))),
-            ],
-          ),
-          const SizedBox(height: 25),
-          const Row(
-            children: [
-              Expanded(child: Text('A gentle reminder', style: _section)),
-              Icon(Icons.auto_awesome, color: AppColors.rose, size: 19),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-                color: const Color(0xFFF1EEE8),
-                borderRadius: BorderRadius.circular(18)),
-            child: Row(
-              children: [
-                const Icon(Icons.lightbulb_outline, color: AppColors.rose),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'A quick reminder to record any expenses from today.',
-                    style: TextStyle(
-                        color: AppColors.ink.withValues(alpha: .8),
-                        height: 1.4,
-                        fontSize: 13),
+      padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_longDate(now), style: _eyebrow),
+                  const SizedBox(height: 7),
+                  Text(greeting, style: _greeting),
+                  const SizedBox(height: 3),
+                  const Text(
+                    'Your business, at a glance',
+                    style: TextStyle(color: AppColors.muted, fontSize: 13),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+            Container(
+              width: 44,
+              height: 44,
+              decoration: const BoxDecoration(
+                color: AppColors.roseLight,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.auto_awesome,
+                color: AppColors.rose,
+                size: 19,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 23),
+        Wrap(
+          spacing: 7,
+          children: _ProfitRange.values.map((preset) {
+            final label = switch (preset) {
+              _ProfitRange.today => 'Today',
+              _ProfitRange.week => '7 days',
+              _ProfitRange.month => '30 days',
+              _ProfitRange.custom =>
+                _range == _ProfitRange.custom && _customRange != null
+                    ? 'Custom'
+                    : 'Choose dates',
+            };
+            return ChoiceChip(
+              label: Text(label),
+              selected: _range == preset,
+              showCheckmark: false,
+              onSelected: (_) => preset == _ProfitRange.custom
+                  ? _chooseRange()
+                  : setState(() => _range = preset),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 14),
+        report.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.all(50),
+            child: Center(child: CircularProgressIndicator()),
           ),
-        ],
-      );
+          error: (_, _) => const _ReportError(),
+          data: (days) => _ReportContent(days: days, rangeLabel: _rangeLabel),
+        ),
+      ],
+    );
+  }
+
+  DateTimeRange get _selectedRange {
+    final today = DateTime.now();
+    final end = DateTime(today.year, today.month, today.day);
+    return switch (_range) {
+      _ProfitRange.today => DateTimeRange(start: end, end: end),
+      _ProfitRange.week => DateTimeRange(
+        start: end.subtract(const Duration(days: 6)),
+        end: end,
+      ),
+      _ProfitRange.month => DateTimeRange(
+        start: end.subtract(const Duration(days: 29)),
+        end: end,
+      ),
+      _ProfitRange.custom =>
+        _customRange ??
+            DateTimeRange(
+              start: end.subtract(const Duration(days: 6)),
+              end: end,
+            ),
+    };
+  }
+
+  String get _rangeLabel => switch (_range) {
+    _ProfitRange.today => 'Today',
+    _ProfitRange.week => 'Last 7 days',
+    _ProfitRange.month => 'Last 30 days',
+    _ProfitRange.custom => 'Selected period',
+  };
+
+  Future<void> _chooseRange() async {
+    final today = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(today.year, today.month, today.day),
+      initialDateRange: _customRange ?? _selectedRange,
+      helpText: 'Choose a report period',
+    );
+    if (picked != null && mounted) {
+      if (picked.duration.inDays > 364) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Choose a period of 12 months or less.'),
+          ),
+        );
+        return;
+      }
+      setState(() {
+        _customRange = DateTimeRange(
+          start: DateTime(
+            picked.start.year,
+            picked.start.month,
+            picked.start.day,
+          ),
+          end: DateTime(picked.end.year, picked.end.month, picked.end.day),
+        );
+        _range = _ProfitRange.custom;
+      });
+    }
   }
 }
 
-const _greeting = TextStyle(
-    color: AppColors.ink,
-    fontSize: 22,
-    fontWeight: FontWeight.w700,
-    height: 1.22,
-    letterSpacing: -0.35);
-const _section = TextStyle(
-    color: AppColors.ink, fontSize: 16, fontWeight: FontWeight.w700);
-const _caption = TextStyle(color: AppColors.muted, fontSize: 11);
+class _ReportContent extends StatelessWidget {
+  const _ReportContent({required this.days, required this.rangeLabel});
+
+  final List<DailyProfit> days;
+  final String rangeLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final summary = _combine(days);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _ProfitCard(summary: summary, label: rangeLabel),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _MetricCard(
+                label: 'Sales',
+                value: formatKes(summary.salesRevenueMinor),
+                icon: Icons.south_west_rounded,
+                tint: AppColors.sageLight,
+                iconColor: AppColors.sage,
+              ),
+            ),
+            const SizedBox(width: 9),
+            Expanded(
+              child: _MetricCard(
+                label: 'Cost of goods',
+                value: formatKes(summary.costOfGoodsSoldMinor),
+                icon: Icons.inventory_2_outlined,
+                tint: AppColors.roseLight,
+                iconColor: AppColors.rose,
+              ),
+            ),
+            const SizedBox(width: 9),
+            Expanded(
+              child: _MetricCard(
+                label: 'Expenses',
+                value: formatKes(summary.operatingExpensesMinor),
+                icon: Icons.north_east_rounded,
+                tint: AppColors.cream,
+                iconColor: AppColors.plum,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        const Text('Daily net profit', style: _section),
+        const SizedBox(height: 10),
+        _DailyChart(days: days),
+        const SizedBox(height: 23),
+        Row(
+          children: [
+            const Expanded(child: Text('Day-by-day', style: _section)),
+            Text(rangeLabel, style: _caption),
+          ],
+        ),
+        const SizedBox(height: 9),
+        ...days.reversed.map(
+          (day) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _DailyProfitTile(day: day),
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          'Profit uses recorded sales, product costs, and active expenses.',
+          style: TextStyle(color: AppColors.muted, fontSize: 10, height: 1.4),
+        ),
+      ],
+    );
+  }
+
+  ProfitSummary _combine(List<DailyProfit> days) {
+    var revenue = 0;
+    var costs = 0;
+    var expenses = 0;
+    for (final day in days) {
+      revenue += day.summary.salesRevenueMinor;
+      costs += day.summary.costOfGoodsSoldMinor;
+      expenses += day.summary.operatingExpensesMinor;
+    }
+    final gross = revenue - costs;
+    return ProfitSummary(
+      salesRevenueMinor: revenue,
+      costOfGoodsSoldMinor: costs,
+      grossProfitMinor: gross,
+      operatingExpensesMinor: expenses,
+      netProfitMinor: gross - expenses,
+    );
+  }
+}
 
 class _ProfitCard extends StatelessWidget {
-  const _ProfitCard();
+  const _ProfitCard({required this.summary, required this.label});
+
+  final ProfitSummary summary;
+  final String label;
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.fromLTRB(21, 20, 21, 18),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.plum, AppColors.plumDeep],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    padding: const EdgeInsets.fromLTRB(20, 19, 20, 17),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        colors: [AppColors.plum, AppColors.plumDeep],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(23),
+      boxShadow: [
+        BoxShadow(
+          color: AppColors.plum.withValues(alpha: .14),
+          blurRadius: 18,
+          offset: const Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'NET PROFIT · ${label.toUpperCase()}',
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1,
           ),
-          borderRadius: BorderRadius.circular(23),
-          boxShadow: [
-            BoxShadow(
-                color: AppColors.plum.withValues(alpha: .15),
-                blurRadius: 18,
-                offset: const Offset(0, 8)),
-          ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Expanded(
-                  child: Text('NET PROFIT TODAY',
-                      style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2)),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: .12),
-                      borderRadius: BorderRadius.circular(20)),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.calendar_today_outlined,
-                          color: Color(0xFFE4CCD7), size: 12),
-                      SizedBox(width: 4),
-                      Text('Today',
-                          style: TextStyle(color: Colors.white, fontSize: 11)),
-                    ],
-                  ),
-                ),
-              ],
+        const SizedBox(height: 8),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            formatKes(summary.netProfitMinor),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 33,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -.8,
             ),
-            const SizedBox(height: 9),
-            const Text('KES 4,860',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 34,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -1)),
-            const SizedBox(height: 5),
-            const Text('A clear view of where you stand',
-                style: TextStyle(color: Colors.white70, fontSize: 12)),
-            const SizedBox(height: 18),
-            Container(height: 1, color: Colors.white.withValues(alpha: .22)),
-            const SizedBox(height: 13),
-            const Row(
-              children: [
-                _ProfitBreakdown(label: 'Gross profit', amount: 'KES 6,060'),
-                SizedBox(width: 26),
-                _ProfitBreakdown(label: 'Expenses', amount: 'KES 1,200'),
-              ],
-            ),
-          ],
+          ),
         ),
-      );
-}
-
-class _ProfitBreakdown extends StatelessWidget {
-  const _ProfitBreakdown({required this.label, required this.amount});
-  final String label;
-  final String amount;
-
-  @override
-  Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label,
-              style: const TextStyle(color: Colors.white70, fontSize: 10)),
-          const SizedBox(height: 3),
-          Text(amount,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600)),
-        ],
-      );
+        const SizedBox(height: 4),
+        Text(
+          'Gross profit  ${formatKes(summary.grossProfitMinor)}',
+          style: const TextStyle(color: Colors.white70, fontSize: 12),
+        ),
+      ],
+    ),
+  );
 }
 
 class _MetricCard extends StatelessWidget {
@@ -268,6 +330,7 @@ class _MetricCard extends StatelessWidget {
     required this.tint,
     required this.iconColor,
   });
+
   final String label;
   final String value;
   final IconData icon;
@@ -276,143 +339,254 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.border)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 29,
-                  height: 29,
-                  decoration: BoxDecoration(color: tint, shape: BoxShape.circle),
-                  child: Icon(icon, color: iconColor, size: 15),
-                ),
-                const Spacer(),
-                const Icon(Icons.more_horiz, color: AppColors.muted, size: 18),
-              ],
-            ),
-            const SizedBox(height: 11),
-            Text(label, style: _caption),
-            const SizedBox(height: 4),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(value,
-                  style: const TextStyle(
-                      color: AppColors.ink,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700)),
-            ),
-          ],
+    padding: const EdgeInsets.fromLTRB(10, 11, 9, 12),
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: AppColors.border),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 26,
+          height: 26,
+          decoration: BoxDecoration(color: tint, shape: BoxShape.circle),
+          child: Icon(icon, color: iconColor, size: 14),
         ),
-      );
-}
-
-class _WeekChart extends StatelessWidget {
-  const _WeekChart();
-  static const values = [0.32, 0.54, 0.43, 0.76, 0.61, 0.92, 0.68];
-  static const days = ['Fri', 'Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
-
-  @override
-  Widget build(BuildContext context) => Container(
-        height: 184,
-        padding: const EdgeInsets.fromLTRB(16, 17, 16, 13),
-        decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: AppColors.border)),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: List.generate(values.length, (index) {
-            final active = index == values.length - 1;
-            return Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(active ? '4.9k' : '',
-                      style: const TextStyle(
-                          color: AppColors.rose,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 6),
-                  AnimatedContainer(
-                    duration: Duration(milliseconds: 320 + index * 45),
-                    curve: Curves.easeOutCubic,
-                    width: 22,
-                    height: 96 * values[index],
-                    decoration: BoxDecoration(
-                        color: active
-                            ? AppColors.rose
-                            : AppColors.roseLight,
-                        borderRadius: BorderRadius.circular(9)),
-                  ),
-                  const SizedBox(height: 9),
-                  Text(days[index],
-                      style: TextStyle(
-                          color: active ? AppColors.rose : AppColors.muted,
-                          fontSize: 10,
-                          fontWeight:
-                              active ? FontWeight.w700 : FontWeight.w400)),
-                ],
-              ),
-            );
-          }),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: _caption,
         ),
-      );
-}
-
-class _ActionTile extends StatelessWidget {
-  const _ActionTile(
-      {required this.icon,
-      required this.title,
-      required this.color,
-      required this.onTap});
-  final IconData icon;
-  final String title;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Material(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 15),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: AppColors.border)),
-            child: Row(
-              children: [
-                Icon(icon, color: color, size: 19),
-                const SizedBox(width: 9),
-                Expanded(
-                    child: Text(title,
-                        style: const TextStyle(
-                            color: AppColors.ink,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600))),
-              ],
+        const SizedBox(height: 3),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: AppColors.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
-      );
-}
-
-void _showComingSoon(BuildContext context, String feature) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('$feature will be available in a later build.'),
-      behavior: SnackBarBehavior.floating,
-      backgroundColor: AppColors.ink,
-      duration: const Duration(seconds: 2),
+      ],
     ),
   );
 }
+
+class _DailyChart extends StatelessWidget {
+  const _DailyChart({required this.days});
+
+  final List<DailyProfit> days;
+
+  @override
+  Widget build(BuildContext context) {
+    final chartWidth = math.max(300.0, days.length * 45.0).toDouble();
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 15, 12, 11),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: chartWidth,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 120,
+                width: chartWidth,
+                child: CustomPaint(
+                  painter: _ProfitChartPainter(
+                    days.map((day) => day.summary.netProfitMinor).toList(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 5),
+              Row(
+                children: days
+                    .map(
+                      (day) => SizedBox(
+                        width: chartWidth / days.length,
+                        child: Text(
+                          '${day.date.day}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: AppColors.muted,
+                            fontSize: 9,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfitChartPainter extends CustomPainter {
+  const _ProfitChartPainter(this.values);
+  final List<int> values;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (values.isEmpty) return;
+    final positiveMax = values
+        .where((value) => value > 0)
+        .fold<int>(0, math.max);
+    final negativeMax = values
+        .where((value) => value < 0)
+        .fold<int>(0, (max, value) => math.max(max, -value));
+    final baseline = size.height * .70;
+    final linePaint = Paint()..color = AppColors.border;
+    canvas.drawLine(
+      Offset(0, baseline),
+      Offset(size.width, baseline),
+      linePaint,
+    );
+    final slot = size.width / values.length;
+    for (var index = 0; index < values.length; index++) {
+      final value = values[index];
+      if (value == 0) continue;
+      final height = value > 0
+          ? (value / positiveMax) * (baseline - 12)
+          : (-value / negativeMax) * (size.height - baseline - 9);
+      final top = value > 0 ? baseline - height : baseline;
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(index * slot + slot * .30, top, slot * .40, height),
+        const Radius.circular(5),
+      );
+      canvas.drawRRect(
+        rect,
+        Paint()..color = value > 0 ? AppColors.rose : AppColors.sage,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ProfitChartPainter oldDelegate) =>
+      !listEquals(values, oldDelegate.values);
+}
+
+class _DailyProfitTile extends StatelessWidget {
+  const _DailyProfitTile({required this.day});
+  final DailyProfit day;
+
+  @override
+  Widget build(BuildContext context) {
+    final summary = day.summary;
+    final negative = summary.netProfitMinor < 0;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(13, 11, 13, 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _shortDate(day.date),
+                  style: const TextStyle(
+                    color: AppColors.ink,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Text(
+                formatKes(summary.netProfitMinor),
+                style: TextStyle(
+                  color: negative ? AppColors.rose : AppColors.plum,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Sales ${formatKes(summary.salesRevenueMinor)}  ·  Cost ${formatKes(summary.costOfGoodsSoldMinor)}  ·  Expenses ${formatKes(summary.operatingExpensesMinor)}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: _caption,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReportError extends StatelessWidget {
+  const _ReportError();
+
+  @override
+  Widget build(BuildContext context) => const Padding(
+    padding: EdgeInsets.all(32),
+    child: Center(child: Text('Profit totals could not be loaded.')),
+  );
+}
+
+String _longDate(DateTime date) =>
+    '${_weekdays[date.weekday - 1].toUpperCase()}, ${_months[date.month - 1].toUpperCase()} ${date.day}';
+
+String _shortDate(DateTime date) =>
+    '${_weekdays[date.weekday - 1].substring(0, 3)}, ${_months[date.month - 1]} ${date.day}';
+
+const _weekdays = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+];
+const _months = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+const _eyebrow = TextStyle(
+  color: AppColors.muted,
+  fontSize: 10,
+  fontWeight: FontWeight.w700,
+  letterSpacing: 1.05,
+);
+const _greeting = TextStyle(
+  color: AppColors.ink,
+  fontSize: 22,
+  fontWeight: FontWeight.w700,
+  height: 1.22,
+  letterSpacing: -.35,
+);
+const _section = TextStyle(
+  color: AppColors.ink,
+  fontSize: 16,
+  fontWeight: FontWeight.w700,
+);
+const _caption = TextStyle(color: AppColors.muted, fontSize: 10);
