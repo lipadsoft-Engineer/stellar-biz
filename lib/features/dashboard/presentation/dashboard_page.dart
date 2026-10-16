@@ -9,6 +9,7 @@ import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/utils/money.dart';
 import '../../products/data/product_repository.dart';
+import '../../reports/data/csv_report_exporter.dart';
 import '../../reports/data/daily_profit_repository.dart';
 import '../../reports/domain/profit_calculator.dart';
 
@@ -24,6 +25,7 @@ class DashboardPage extends ConsumerStatefulWidget {
 class _DashboardPageState extends ConsumerState<DashboardPage> {
   _ProfitRange _range = _ProfitRange.today;
   DateTimeRange? _customRange;
+  bool _exporting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +118,33 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             child: Center(child: CircularProgressIndicator()),
           ),
           error: (_, _) => const _ReportError(),
-          data: (days) => _ReportContent(days: days, rangeLabel: _rangeLabel),
+          data: (days) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: Builder(
+                  builder: (buttonContext) => TextButton.icon(
+                    onPressed: _exporting
+                        ? null
+                        : () => _exportCsv(buttonContext, days, range),
+                    icon: _exporting
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.file_download_outlined, size: 17),
+                    label: Text(_exporting ? 'Preparing…' : 'Export CSV'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.rose,
+                    ),
+                  ),
+                ),
+              ),
+              _ReportContent(days: days, rangeLabel: _rangeLabel),
+            ],
+          ),
         ),
       ],
     );
@@ -150,6 +178,33 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     _ProfitRange.month => 'Last 30 days',
     _ProfitRange.custom => 'Selected period',
   };
+
+  Future<void> _exportCsv(
+    BuildContext buttonContext,
+    List<DailyProfit> days,
+    DateTimeRange range,
+  ) async {
+    setState(() => _exporting = true);
+    try {
+      final renderObject = buttonContext.findRenderObject();
+      final box = renderObject is RenderBox ? renderObject : null;
+      await const CsvReportExporter().share(
+        days,
+        range: range,
+        sharePositionOrigin: box == null
+            ? null
+            : box.localToGlobal(Offset.zero) & box.size,
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not export this report.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
 
   Future<void> _chooseRange() async {
     final today = DateTime.now();
