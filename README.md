@@ -46,8 +46,8 @@ The app uses `go_router` for tab navigation and Riverpod for dependency and UI s
 - [x] Implement notes.
 
 ### Phase 4 — Dashboard and Reports
-- [ ] Calculate daily sales, costs, gross profit, expenses, and net profit.
-- [ ] Add charts and date-range filters.
+- [x] Calculate daily sales, costs, gross profit, expenses, and net profit.
+- [x] Add charts and date-range filters.
 - [ ] Implement low-stock alerts.
 - [ ] Add CSV export.
 
