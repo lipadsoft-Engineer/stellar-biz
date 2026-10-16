@@ -3,9 +3,12 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
+import '../../../core/database/app_database.dart';
 import '../../../core/utils/money.dart';
+import '../../products/data/product_repository.dart';
 import '../../reports/data/daily_profit_repository.dart';
 import '../../reports/domain/profit_calculator.dart';
 
@@ -28,6 +31,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final report = ref.watch(
       dailyProfitsProvider(ProfitDateRange(start: range.start, end: range.end)),
     );
+    final lowStockProducts = (ref.watch(productsProvider).asData?.value ?? [])
+        .where(
+          (product) =>
+              !product.isArchived &&
+              product.lowStockThreshold != null &&
+              product.stockQuantity <= product.lowStockThreshold!,
+        )
+        .toList();
     final now = DateTime.now();
     final greeting = now.hour < 12
         ? 'Good morning'
@@ -70,7 +81,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
           ],
         ),
-        const SizedBox(height: 23),
+        if (lowStockProducts.isNotEmpty) ...[
+          const SizedBox(height: 17),
+          _LowStockAlert(products: lowStockProducts),
+          const SizedBox(height: 19),
+        ] else
+          const SizedBox(height: 23),
         Wrap(
           spacing: 7,
           children: _ProfitRange.values.map((preset) {
@@ -258,6 +274,101 @@ class _ReportContent extends StatelessWidget {
       grossProfitMinor: gross,
       operatingExpensesMinor: expenses,
       netProfitMinor: gross - expenses,
+    );
+  }
+}
+
+class _LowStockAlert extends StatelessWidget {
+  const _LowStockAlert({required this.products});
+
+  final List<Product> products;
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = products.take(3).toList();
+    final extraCount = products.length - visible.length;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(15, 13, 13, 12),
+      decoration: BoxDecoration(
+        color: AppColors.roseLight,
+        borderRadius: BorderRadius.circular(19),
+        border: Border.all(color: AppColors.rose.withValues(alpha: .18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.inventory_2_outlined,
+                color: AppColors.rose,
+                size: 19,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '${products.length} low-stock ${products.length == 1 ? 'product' : 'products'}',
+                  style: const TextStyle(
+                    color: AppColors.plum,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => context.go('/products'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.plum,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: Size.zero,
+                ),
+                child: const Text('Manage', style: TextStyle(fontSize: 11)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          ...visible.map(
+            (product) => Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      product.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.ink,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${product.stockQuantity} left · alert at ${product.lowStockThreshold}',
+                    style: const TextStyle(
+                      color: AppColors.rose,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (extraCount > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 7),
+              child: Text(
+                'And $extraCount more',
+                style: const TextStyle(
+                  color: AppColors.plum,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
