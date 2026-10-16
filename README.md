@@ -49,7 +49,7 @@ The app uses `go_router` for tab navigation and Riverpod for dependency and UI s
 - [x] Calculate daily sales, costs, gross profit, expenses, and net profit.
 - [x] Add charts and date-range filters.
 - [x] Implement low-stock alerts.
-- [ ] Add CSV export.
+- [x] Add CSV export.
 
 ### Phase 5 — Security and Reliability
 - [ ] Add optional app locking.
