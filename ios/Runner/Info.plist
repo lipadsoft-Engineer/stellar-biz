@@ -18,6 +18,8 @@
 	<string>sole_proprietor</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Take product photos to identify your stock.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Use Face ID to unlock Petal & Ledger.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Choose product photos to identify your stock.</string>
 	<key>CFBundlePackageType</key>
