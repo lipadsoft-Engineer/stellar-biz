@@ -1,11 +1,11 @@
 {
-    "name": "sole_proprietor",
-    "short_name": "sole_proprietor",
+    "name": "Sole Proprietor",
+    "short_name": "Sole Proprietor",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Simple inventory and accounting for a sole proprietor.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
