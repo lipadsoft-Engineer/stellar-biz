@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>sole_proprietor</string>
+	<string>Sole Proprietor</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Take product photos to identify your stock.</string>
 	<key>NSFaceIDUsageDescription</key>
