@@ -52,7 +52,7 @@ class AppLockService {
   Future<bool> authenticateBiometric() async {
     try {
       return await _localAuth.authenticate(
-        localizedReason: 'Unlock Petal & Ledger',
+        localizedReason: 'Unlock Stellar Biz',
         biometricOnly: true,
         persistAcrossBackgrounding: true,
       );
