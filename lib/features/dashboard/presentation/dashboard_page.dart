@@ -42,12 +42,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         )
         .toList();
     final now = DateTime.now();
-    final greeting = now.hour < 12
-        ? 'Good morning'
-        : now.hour < 17
-        ? 'Good afternoon'
-        : 'Good evening';
-
     return ListView(
       padding: const EdgeInsets.fromLTRB(22, 22, 22, 30),
       children: [
@@ -59,7 +53,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 children: [
                   Text(_longDate(now), style: _eyebrow),
                   const SizedBox(height: 7),
-                  Text(greeting, style: _greeting),
+                  const Text('Stellar Biz', style: _greeting),
                   const SizedBox(height: 3),
                   const Text(
                     'Your business, at a glance',
