@@ -10,7 +10,7 @@ class SoleNoteApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => MaterialApp.router(
-    title: 'Sole Proprietor',
+    title: 'Stellar Biz',
     debugShowCheckedModeBanner: false,
     theme: AppTheme.light,
     routerConfig: ref.watch(appRouterProvider),
