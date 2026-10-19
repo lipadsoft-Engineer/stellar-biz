@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -546,46 +545,136 @@ class _DailyChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (days.isEmpty) {
+      return Container(
+        height: 184,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: const Text(
+          'No profit data for this period.',
+          style: TextStyle(color: AppColors.muted, fontSize: 12),
+        ),
+      );
+    }
+
     final chartWidth = math.max(300.0, days.length * 45.0).toDouble();
+    final slotWidth = chartWidth / days.length;
+    final values = days.map((day) => day.summary.netProfitMinor).toList();
+    final positiveMax = values
+        .where((value) => value > 0)
+        .fold<int>(0, (maximum, value) => value > maximum ? value : maximum);
+    final negativeMax = values
+        .where((value) => value < 0)
+        .fold<int>(0, (maximum, value) => -value > maximum ? -value : maximum);
+    const plotHeight = 128.0;
+    const baseline = plotHeight * .72;
+    final positiveHeight = baseline - 13;
+    final negativeHeight = plotHeight - baseline - 4;
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 15, 12, 11),
+      height: 184,
+      padding: const EdgeInsets.fromLTRB(16, 17, 16, 13),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(color: AppColors.border),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SizedBox(
           width: chartWidth,
-          child: Column(
+          height: plotHeight + 23,
+          child: Stack(
             children: [
-              SizedBox(
-                height: 120,
-                width: chartWidth,
-                child: CustomPaint(
-                  painter: _ProfitChartPainter(
-                    days.map((day) => day.summary.netProfitMinor).toList(),
-                  ),
-                ),
+              Positioned(
+                left: 0,
+                right: 0,
+                top: baseline,
+                child: Container(height: 1, color: AppColors.border),
               ),
-              const SizedBox(height: 5),
               Row(
-                children: days
-                    .map(
-                      (day) => SizedBox(
-                        width: chartWidth / days.length,
-                        child: Text(
-                          '${day.date.day}',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: AppColors.muted,
-                            fontSize: 9,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: List.generate(days.length, (index) {
+                  final day = days[index];
+                  final value = values[index];
+                  final barHeight = value > 0
+                      ? (value / positiveMax) * positiveHeight
+                      : value < 0
+                      ? ((-value) / negativeMax) * negativeHeight
+                      : 2.0;
+                  final top = value > 0
+                      ? baseline - barHeight
+                      : value < 0
+                      ? baseline
+                      : baseline - 1;
+                  final isLatest = index == days.length - 1;
+                  final barColor = value < 0
+                      ? (isLatest ? AppColors.sage : AppColors.sageLight)
+                      : (isLatest ? AppColors.rose : AppColors.roseLight);
+
+                  return SizedBox(
+                    width: slotWidth,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        AnimatedPositioned(
+                          duration: Duration(milliseconds: 320 + index * 20),
+                          curve: Curves.easeOutCubic,
+                          left: (slotWidth - 22) / 2,
+                          top: top,
+                          width: 22,
+                          height: barHeight,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            decoration: BoxDecoration(
+                              color: barColor,
+                              borderRadius: BorderRadius.circular(9),
+                            ),
                           ),
                         ),
-                      ),
-                    )
-                    .toList(),
+                        if (isLatest && value > 0)
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            top: math.max(0.0, top - 15).toDouble(),
+                            child: Text(
+                              _compactProfit(value),
+                              maxLines: 1,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.clip,
+                              style: const TextStyle(
+                                color: AppColors.rose,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          top: plotHeight + 5,
+                          child: Text(
+                            _chartDateLabel(day.date, days.length),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: isLatest
+                                  ? AppColors.rose
+                                  : AppColors.muted,
+                              fontSize: 10,
+                              fontWeight: isLatest
+                                  ? FontWeight.w700
+                                  : FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
               ),
             ],
           ),
@@ -593,50 +682,19 @@ class _DailyChart extends StatelessWidget {
       ),
     );
   }
-}
 
-class _ProfitChartPainter extends CustomPainter {
-  const _ProfitChartPainter(this.values);
-  final List<int> values;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (values.isEmpty) return;
-    final positiveMax = values
-        .where((value) => value > 0)
-        .fold<int>(0, math.max);
-    final negativeMax = values
-        .where((value) => value < 0)
-        .fold<int>(0, (max, value) => math.max(max, -value));
-    final baseline = size.height * .70;
-    final linePaint = Paint()..color = AppColors.border;
-    canvas.drawLine(
-      Offset(0, baseline),
-      Offset(size.width, baseline),
-      linePaint,
-    );
-    final slot = size.width / values.length;
-    for (var index = 0; index < values.length; index++) {
-      final value = values[index];
-      if (value == 0) continue;
-      final height = value > 0
-          ? (value / positiveMax) * (baseline - 12)
-          : (-value / negativeMax) * (size.height - baseline - 9);
-      final top = value > 0 ? baseline - height : baseline;
-      final rect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(index * slot + slot * .30, top, slot * .40, height),
-        const Radius.circular(5),
-      );
-      canvas.drawRRect(
-        rect,
-        Paint()..color = value > 0 ? AppColors.rose : AppColors.sage,
-      );
-    }
+  String _chartDateLabel(DateTime date, int dayCount) {
+    if (dayCount > 7) return '${date.day}';
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return weekdays[date.weekday - 1];
   }
 
-  @override
-  bool shouldRepaint(covariant _ProfitChartPainter oldDelegate) =>
-      !listEquals(values, oldDelegate.values);
+  String _compactProfit(int minorUnits) {
+    final amount = minorUnits / 100;
+    if (amount >= 1000000) return '${(amount / 1000000).toStringAsFixed(1)}m';
+    if (amount >= 1000) return '${(amount / 1000).toStringAsFixed(1)}k';
+    return amount.toStringAsFixed(0);
+  }
 }
 
 class _DailyProfitTile extends StatelessWidget {
