@@ -153,7 +153,7 @@ class _UnlockScreenState extends State<_UnlockScreen> {
               ),
               const SizedBox(height: 18),
               const Text(
-                'Petal & Ledger',
+                'Stellar Biz',
                 style: TextStyle(
                   color: AppColors.ink,
                   fontSize: 23,
