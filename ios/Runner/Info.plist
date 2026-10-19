@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Sole Proprietor</string>
+	<string>Stellar Biz</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,11 +15,11 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Sole Proprietor</string>
+	<string>Stellar Biz</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Take product photos to identify your stock.</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>Use Face ID to unlock Petal & Ledger.</string>
+	<string>Use Face ID to unlock Stellar Biz.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Choose product photos to identify your stock.</string>
 	<key>CFBundlePackageType</key>
