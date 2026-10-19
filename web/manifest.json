@@ -1,11 +1,11 @@
 {
-    "name": "Sole Proprietor",
-    "short_name": "Sole Proprietor",
+    "name": "Stellar Biz",
+    "short_name": "Stellar Biz",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Simple inventory and accounting for a sole proprietor.",
+    "description": "Simple inventory and accounting for independent sellers.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
