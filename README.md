@@ -1,6 +1,6 @@
-# Petal & Ledger
+# Stellar Biz
 
-A simple, local-first inventory and profit tracker for a sole proprietor. The visual direction is warm cream, dusty rose, sage, and plum, with short transitions and a five-item bottom navigation.
+A simple, local-first inventory and profit tracker for independent sellers. The visual direction is warm cream, dusty rose, sage, and plum, with short transitions and a five-item bottom navigation.
 
 ## Project structure
 
