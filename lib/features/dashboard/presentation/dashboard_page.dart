@@ -76,7 +76,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.auto_awesome,
+                Icons.storefront_outlined,
                 color: AppColors.rose,
                 size: 19,
               ),
