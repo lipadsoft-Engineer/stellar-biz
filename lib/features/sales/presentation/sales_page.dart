@@ -163,7 +163,9 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   final _formKey = GlobalKey<FormState>();
   final _discount = TextEditingController(text: '0');
   final _paid = TextEditingController(text: '0');
+  final _productSearch = TextEditingController();
   final Map<int, int> _quantities = {};
+  String _productQuery = '';
   String _method = 'Cash';
   bool _saving = false;
 
@@ -171,6 +173,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   void dispose() {
     _discount.dispose();
     _paid.dispose();
+    _productSearch.dispose();
     super.dispose();
   }
 
@@ -179,6 +182,15 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
     (sum, product) =>
         sum + product.sellingPriceMinor * (_quantities[product.id] ?? 0),
   );
+
+  List<Product> get _matchingProducts {
+    final query = _productQuery.trim().toLowerCase();
+    if (query.isEmpty) return widget.products;
+    return widget.products.where((product) {
+      return product.name.toLowerCase().contains(query) ||
+          (product.sku?.toLowerCase().contains(query) ?? false);
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -215,7 +227,40 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                 shrinkWrap: true,
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                 children: [
-                  ...widget.products.map(_productRow),
+                  TextField(
+                    controller: _productSearch,
+                    onChanged: (value) => setState(() => _productQuery = value),
+                    decoration: InputDecoration(
+                      hintText: 'Search products or SKU',
+                      prefixIcon: const Icon(Icons.search_rounded),
+                      suffixIcon: _productQuery.isEmpty
+                          ? null
+                          : IconButton(
+                              tooltip: 'Clear search',
+                              onPressed: () {
+                                _productSearch.clear();
+                                setState(() => _productQuery = '');
+                              },
+                              icon: const Icon(Icons.close_rounded),
+                            ),
+                      filled: true,
+                      fillColor: AppColors.surface,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  if (_matchingProducts.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 24),
+                      child: Center(
+                        child: Text(
+                          'No matching products.',
+                          style: TextStyle(color: AppColors.muted),
+                        ),
+                      ),
+                    )
+                  else
+                    ..._matchingProducts.map(_productRow),
                   const SizedBox(height: 7),
                   Row(
                     children: [
