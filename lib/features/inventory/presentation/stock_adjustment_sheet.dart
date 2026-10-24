@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/utils/app_message.dart';
 import '../data/inventory_repository.dart';
 import '../domain/stock_adjustment_request.dart';
 
@@ -174,9 +175,7 @@ class _StockAdjustmentSheetState extends ConsumerState<StockAdjustmentSheet> {
         final message = error is InventoryValidationException
             ? error.message
             : 'Stock could not be updated.';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
-        );
+        showAppMessage(context, message, type: AppMessageType.error);
       }
     } finally {
       if (mounted) setState(() => _saving = false);
