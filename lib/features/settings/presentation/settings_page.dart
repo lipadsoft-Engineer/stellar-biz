@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/theme.dart';
 import '../../../core/security/app_lock_service.dart';
 import '../../../core/security/pin_setup_sheet.dart';
+import '../../../core/utils/app_message.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -174,7 +175,7 @@ class _SettingsPageState extends State<SettingsPage> {
         await _service.enable(pin);
         if (mounted) setState(() => _enabled = true);
       } catch (_) {
-        _showMessage('Could not enable app lock.');
+        _showMessage('Could not enable app lock.', type: AppMessageType.error);
       } finally {
         if (mounted) setState(() => _working = false);
       }
@@ -209,7 +210,7 @@ class _SettingsPageState extends State<SettingsPage> {
         });
       }
     } catch (_) {
-      _showMessage('Could not turn off app lock.');
+      _showMessage('Could not turn off app lock.', type: AppMessageType.error);
     } finally {
       if (mounted) setState(() => _working = false);
     }
@@ -221,7 +222,10 @@ class _SettingsPageState extends State<SettingsPage> {
       await _service.setBiometricsEnabled(value);
       if (mounted) setState(() => _biometrics = value);
     } catch (_) {
-      _showMessage('Could not update biometric settings.');
+      _showMessage(
+        'Could not update biometric settings.',
+        type: AppMessageType.error,
+      );
     } finally {
       if (mounted) setState(() => _working = false);
     }
@@ -242,19 +246,17 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() => _working = true);
     try {
       await _service.changePin(pin);
-      _showMessage('App PIN changed.');
+      _showMessage('App PIN changed.', type: AppMessageType.success);
     } catch (_) {
-      _showMessage('Could not change the app PIN.');
+      _showMessage('Could not change the app PIN.', type: AppMessageType.error);
     } finally {
       if (mounted) setState(() => _working = false);
     }
   }
 
-  void _showMessage(String text) {
+  void _showMessage(String text, {required AppMessageType type}) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(text), behavior: SnackBarBehavior.floating),
-    );
+    showAppMessage(context, text, type: type);
   }
 }
 
