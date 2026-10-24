@@ -8,6 +8,7 @@ import '../../../core/database/app_database.dart';
 import '../../../core/utils/app_message.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/utils/product_image_storage.dart';
+import '../../../core/widgets/bottom_action_button.dart';
 import '../../inventory/presentation/stock_adjustment_sheet.dart';
 import '../../inventory/presentation/stock_history_sheet.dart';
 import '../data/product_repository.dart';
@@ -66,11 +67,6 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
                     ),
                   ],
                 ),
-              ),
-              FilledButton.icon(
-                onPressed: _addProduct,
-                icon: const Icon(Icons.add_rounded, size: 19),
-                label: const Text('Add'),
               ),
             ],
           ),
@@ -162,10 +158,6 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
                             ? 'Archived products will appear here.'
                             : 'Add a product to start keeping track of stock.'
                       : 'Try another name or clear your filters.',
-                  actionLabel: isEmpty && !_showArchived
-                      ? 'Add first product'
-                      : null,
-                  onAction: _addProduct,
                 );
               }
 
@@ -183,6 +175,11 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
               );
             },
           ),
+        ),
+        BottomActionButton(
+          label: 'Add product',
+          icon: Icons.add_rounded,
+          onPressed: _addProduct,
         ),
       ],
     );
@@ -534,17 +531,10 @@ class _StockBadge extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({
-    required this.title,
-    required this.subtitle,
-    required this.actionLabel,
-    required this.onAction,
-  });
+  const _EmptyState({required this.title, required this.subtitle});
 
   final String title;
   final String subtitle;
-  final String? actionLabel;
-  final VoidCallback onAction;
 
   @override
   Widget build(BuildContext context) => Center(
@@ -585,14 +575,6 @@ class _EmptyState extends StatelessWidget {
               height: 1.4,
             ),
           ),
-          if (actionLabel != null) ...[
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: onAction,
-              icon: const Icon(Icons.add_rounded),
-              label: Text(actionLabel!),
-            ),
-          ],
         ],
       ),
     ),
