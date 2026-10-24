@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/utils/app_message.dart';
 import '../../../core/utils/money.dart';
 import '../../expenses/presentation/expenses_page.dart';
 import '../../products/data/product_repository.dart';
@@ -105,10 +106,10 @@ class _SalesPageState extends ConsumerState<SalesPage> {
   Future<void> _newSale(BuildContext context, List<Product> products) async {
     final available = products.where((product) => !product.isArchived).toList();
     if (available.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Add an active product before recording a sale.'),
-        ),
+      showAppMessage(
+        context,
+        'Add an active product before recording a sale.',
+        type: AppMessageType.info,
       );
       return;
     }
@@ -123,8 +124,7 @@ class _SalesPageState extends ConsumerState<SalesPage> {
       builder: (_) => NewSaleSheet(products: available),
     );
     if (saved == true && context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Sale recorded.')));
+      showAppMessage(context, 'Sale recorded.', type: AppMessageType.success);
     }
   }
 
@@ -144,8 +144,7 @@ class _SalesPageState extends ConsumerState<SalesPage> {
       builder: (_) => PaymentSheet(sale: sale),
     );
     if (saved == true && context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Payment added.')));
+      showAppMessage(context, 'Payment added.', type: AppMessageType.success);
     }
   }
 }
@@ -446,9 +445,8 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
 
   int _read(String value) => parseMoneyToMinorUnits(value) ?? 0;
 
-  void _message(String text) => ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(text), behavior: SnackBarBehavior.floating),
-  );
+  void _message(String text) =>
+      showAppMessage(context, text, type: AppMessageType.error);
 }
 
 class PaymentSheet extends ConsumerStatefulWidget {
@@ -562,9 +560,8 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
     }
   }
 
-  void _message(String text) => ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(text), behavior: SnackBarBehavior.floating),
-  );
+  void _message(String text) =>
+      showAppMessage(context, text, type: AppMessageType.error);
 }
 
 class _SaleCard extends StatelessWidget {
