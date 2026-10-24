@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/utils/app_message.dart';
 import '../data/note_repository.dart';
 import '../domain/note_draft.dart';
 
@@ -87,8 +88,10 @@ class NotesPage extends ConsumerWidget {
       builder: (_) => NoteFormSheet(note: note),
     );
     if (saved == true && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(note == null ? 'Note saved.' : 'Note updated.')),
+      showAppMessage(
+        context,
+        note == null ? 'Note saved.' : 'Note updated.',
+        type: AppMessageType.success,
       );
     }
   }
@@ -119,13 +122,14 @@ class NotesPage extends ConsumerWidget {
     try {
       await ref.read(noteRepositoryProvider).deleteNote(note.id);
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Note deleted.')));
+        showAppMessage(context, 'Note deleted.', type: AppMessageType.success);
       }
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not delete this note.')),
+        showAppMessage(
+          context,
+          'Could not delete this note.',
+          type: AppMessageType.error,
         );
       }
     }
@@ -241,8 +245,10 @@ class _NoteFormSheetState extends ConsumerState<NoteFormSheet> {
 
   Future<void> _save() async {
     if (_content.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Write something for your note.')),
+      showAppMessage(
+        context,
+        'Write something for your note.',
+        type: AppMessageType.error,
       );
       return;
     }
@@ -261,9 +267,7 @@ class _NoteFormSheetState extends ConsumerState<NoteFormSheet> {
           ? error.message
           : 'Could not save this note.';
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
-        );
+        showAppMessage(context, message, type: AppMessageType.error);
       }
     } finally {
       if (mounted) setState(() => _saving = false);
