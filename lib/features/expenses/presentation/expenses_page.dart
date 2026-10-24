@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/utils/app_message.dart';
 import '../../../core/utils/money.dart';
 import '../data/expense_repository.dart';
 import '../domain/expense_draft.dart';
@@ -83,8 +84,7 @@ class ExpensesPage extends ConsumerWidget {
       builder: (_) => const ExpenseFormSheet(),
     );
     if (saved == true && context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Expense saved.')));
+      showAppMessage(context, 'Expense saved.', type: AppMessageType.success);
     }
   }
 
@@ -116,13 +116,18 @@ class ExpensesPage extends ConsumerWidget {
     try {
       await ref.read(expenseRepositoryProvider).voidExpense(expense.id);
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Expense voided.')));
+        showAppMessage(
+          context,
+          'Expense voided.',
+          type: AppMessageType.success,
+        );
       }
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not void this expense.')),
+        showAppMessage(
+          context,
+          'Could not void this expense.',
+          type: AppMessageType.error,
         );
       }
     }
@@ -331,9 +336,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
           ? error.message
           : 'Could not save this expense.';
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
-        );
+        showAppMessage(context, message, type: AppMessageType.error);
       }
     } finally {
       if (mounted) setState(() => _saving = false);
