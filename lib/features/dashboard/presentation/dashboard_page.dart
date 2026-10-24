@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/utils/app_message.dart';
 import '../../../core/utils/money.dart';
 import '../../products/data/product_repository.dart';
 import '../../reports/data/csv_report_exporter.dart';
@@ -190,8 +191,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       );
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not export this report.')),
+        showAppMessage(
+          context,
+          'Could not export this report.',
+          type: AppMessageType.error,
         );
       }
     } finally {
@@ -210,10 +213,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
     if (picked != null && mounted) {
       if (picked.duration.inDays > 364) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Choose a period of 12 months or less.'),
-          ),
+        showAppMessage(
+          context,
+          'Choose a period of 12 months or less.',
+          type: AppMessageType.error,
         );
         return;
       }
