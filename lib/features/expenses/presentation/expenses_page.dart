@@ -6,6 +6,7 @@ import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/utils/app_message.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/widgets/bottom_action_button.dart';
 import '../data/expense_repository.dart';
 import '../domain/expense_draft.dart';
 
@@ -49,11 +50,6 @@ class ExpensesPage extends ConsumerWidget {
                   ],
                 ),
               ),
-              FilledButton.icon(
-                onPressed: () => _addExpense(context),
-                icon: const Icon(Icons.add_rounded, size: 18),
-                label: const Text('Add'),
-              ),
             ],
           ),
         ),
@@ -67,6 +63,11 @@ class ExpensesPage extends ConsumerWidget {
               onVoid: (expense) => _voidExpense(context, ref, expense),
             ),
           ),
+        ),
+        BottomActionButton(
+          label: 'Add expense',
+          icon: Icons.add_rounded,
+          onPressed: () => _addExpense(context),
         ),
       ],
     );
