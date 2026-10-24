@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/utils/app_message.dart';
+import '../../../core/widgets/bottom_action_button.dart';
 import '../data/note_repository.dart';
 import '../domain/note_draft.dart';
 
@@ -41,11 +42,6 @@ class NotesPage extends ConsumerWidget {
                   ],
                 ),
               ),
-              FilledButton.icon(
-                onPressed: () => _editNote(context, ref),
-                icon: const Icon(Icons.add_rounded, size: 18),
-                label: const Text('New note'),
-              ),
             ],
           ),
         ),
@@ -67,6 +63,11 @@ class NotesPage extends ConsumerWidget {
                     ),
                   ),
           ),
+        ),
+        BottomActionButton(
+          label: 'New note',
+          icon: Icons.add_rounded,
+          onPressed: () => _editNote(context, ref),
         ),
       ],
     );
