@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/utils/app_message.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/utils/product_image_storage.dart';
 import '../../inventory/presentation/stock_adjustment_sheet.dart';
@@ -316,15 +317,16 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
         final message = error is ProductValidationException
             ? error.message
             : 'That change could not be saved.';
-        _showMessage(message);
+        _showMessage(message, type: AppMessageType.error);
       }
     }
   }
 
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
-    );
+  void _showMessage(
+    String message, {
+    AppMessageType type = AppMessageType.success,
+  }) {
+    showAppMessage(context, message, type: type);
   }
 }
 
