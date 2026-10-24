@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
+import '../../../core/utils/app_message.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/utils/product_image_storage.dart';
 import '../data/product_repository.dart';
@@ -373,8 +374,10 @@ class _ProductFormSheetState extends ConsumerState<ProductFormSheet> {
       if (image != null && mounted) setState(() => _selectedImage = image);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open that photo source.')),
+        showAppMessage(
+          context,
+          'Could not open that photo source.',
+          type: AppMessageType.error,
         );
       }
     }
@@ -427,9 +430,7 @@ class _ProductFormSheetState extends ConsumerState<ProductFormSheet> {
         final message = error is ProductValidationException
             ? error.message
             : 'Could not save this product. Check that its SKU is unique.';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
-        );
+        showAppMessage(context, message, type: AppMessageType.error);
       }
     } finally {
       if (mounted) setState(() => _saving = false);
