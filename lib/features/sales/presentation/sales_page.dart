@@ -6,6 +6,7 @@ import '../../../app/theme.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/utils/app_message.dart';
 import '../../../core/utils/money.dart';
+import '../../../core/widgets/bottom_action_button.dart';
 import '../../expenses/presentation/expenses_page.dart';
 import '../../products/data/product_repository.dart';
 import '../data/sale_repository.dart';
@@ -58,13 +59,6 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                   ],
                 ),
               ),
-              FilledButton.icon(
-                onPressed: productList == null
-                    ? null
-                    : () => _newSale(context, productList),
-                icon: const Icon(Icons.add_rounded, size: 18),
-                label: const Text('New sale'),
-              ),
               const SizedBox(width: 2),
               IconButton(
                 onPressed: () => setState(() => _showExpenses = true),
@@ -85,7 +79,6 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                     hasProducts:
                         productList?.any((product) => !product.isArchived) ??
                         false,
-                    onAdd: () => _newSale(context, productList ?? []),
                   )
                 : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 2, 20, 22),
@@ -98,6 +91,13 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                     ),
                   ),
           ),
+        ),
+        BottomActionButton(
+          label: 'New sale',
+          icon: Icons.add_rounded,
+          onPressed: productList == null
+              ? null
+              : () => _newSale(context, productList),
         ),
       ],
     );
@@ -736,9 +736,8 @@ class _SaleTotals extends StatelessWidget {
 }
 
 class _SalesEmptyState extends StatelessWidget {
-  const _SalesEmptyState({required this.hasProducts, required this.onAdd});
+  const _SalesEmptyState({required this.hasProducts});
   final bool hasProducts;
-  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) => Center(
@@ -764,7 +763,7 @@ class _SalesEmptyState extends StatelessWidget {
           const SizedBox(height: 5),
           Text(
             hasProducts
-                ? 'Choose products, record payment, and stock updates automatically.'
+                ? 'Use the New sale button below to choose products and record payment.'
                 : 'Your active products will be available here when you record a sale.',
             textAlign: TextAlign.center,
             style: const TextStyle(
@@ -773,14 +772,6 @@ class _SalesEmptyState extends StatelessWidget {
               height: 1.4,
             ),
           ),
-          if (hasProducts) ...[
-            const SizedBox(height: 15),
-            FilledButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('New sale'),
-            ),
-          ],
         ],
       ),
     ),
