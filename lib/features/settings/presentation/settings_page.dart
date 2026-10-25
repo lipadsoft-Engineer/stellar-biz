@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/security/app_lock_service.dart';
@@ -154,8 +155,63 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
       ),
+      const SizedBox(height: 28),
+      Center(
+        child: Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            const Text(
+              'Made with love by ',
+              style: TextStyle(color: AppColors.muted, fontSize: 10),
+            ),
+            Semantics(
+              link: true,
+              label: 'Peter Ngare portfolio',
+              child: InkWell(
+                onTap: _openPortfolio,
+                borderRadius: BorderRadius.circular(4),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 3),
+                  child: Text(
+                    'Peter Ngare',
+                    style: TextStyle(
+                      color: AppColors.rose,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     ],
   );
+
+  Future<void> _openPortfolio() async {
+    try {
+      final opened = await launchUrl(
+        Uri.parse('https://peter-ngare.ellypad.com'),
+        mode: LaunchMode.externalApplication,
+      );
+      if (!opened && mounted) {
+        _showMessage(
+          'Could not open the portfolio link.',
+          type: AppMessageType.error,
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        _showMessage(
+          'Could not open the portfolio link.',
+          type: AppMessageType.error,
+        );
+      }
+    }
+  }
 
   Future<void> _setEnabled(bool value) async {
     if (value) {
