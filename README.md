@@ -83,3 +83,7 @@ lib/
 ```
 
 Feature code is organized into `data/`, `domain/`, and `presentation/`; shared concerns live under `core/`.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
