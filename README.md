@@ -1,6 +1,68 @@
-# Stellar Biz
+# Stellar Biz — Version 1
 
-A simple, local-first inventory and profit tracker for independent sellers. The visual direction is warm cream, dusty rose, sage, and plum, with short transitions and a five-item bottom navigation.
+Stellar Biz is a simple, local-first inventory and accounting app for independent sellers. It helps a sole proprietor keep products, stock, sales, expenses, notes, and day-to-day profit in one place.
+
+**Version:** `1.0.0+1` · **Currency:** KES · **Storage:** On device; no account or internet connection is required for normal use.
+
+## Screenshots
+
+<details>
+<summary>View the app screens</summary>
+
+These device captures show the main v1 screens. The primary create actions have since been moved to the bottom of their screens, above the navigation bar.
+
+| Dashboard | Products |
+| --- | --- |
+| <img src="docs/screenshots/dashboard.jpg" width="260" alt="Stellar Biz dashboard with daily profit and range filters"> | <img src="docs/screenshots/products.jpg" width="260" alt="Product list with search and stock filters"> |
+
+| Record a sale | Notes |
+| --- | --- |
+| <img src="docs/screenshots/record-sale.jpg" width="260" alt="Sale entry with product search, quantities, discount and payment"> | <img src="docs/screenshots/notes.jpg" width="260" alt="Seller notes list"> |
+
+| Settings |
+| --- |
+| <img src="docs/screenshots/settings.jpg" width="260" alt="Settings for PIN and biometric app lock"> |
+
+</details>
+
+## What’s included
+
+- **Dashboard:** See daily sales, cost of goods, expenses, gross profit, and net profit. View today, the last 7 or 30 days, or choose a custom period. Export a profit report as CSV and see low-stock alerts.
+- **Products and inventory:** Add, edit, archive, and remove products; attach a photo from the device or camera; track stock, adjust quantities, and review stock history.
+- **Sales and payments:** Search products by name or SKU, add sale quantities, record a discount and payment method, and record later payments. Recording a sale updates stock.
+- **Expenses:** Record and review business expenses; void an expense while keeping its record.
+- **Notes:** Keep and edit personal business notes on the device.
+- **Optional app lock:** Protect access with a 4–8 digit PIN and, where available, biometric unlock.
+- **Mobile-friendly interface:** Five-tab navigation, a warm cream, rose, sage, and plum theme, and create actions placed near the bottom of the main screens.
+
+## Profit calculation
+
+The dashboard derives profit from recorded transactions: gross profit is sales revenue less cost of goods sold; net profit is gross profit less active operating expenses. Figures are a management estimate based on the information entered in the app. Stellar Biz does not prepare statutory accounts or calculate tax.
+
+## Data and v1 scope
+
+Stellar Biz stores business records in a local SQLite database. Product photos are resized before being saved in app storage. There is no cloud account or sync in v1. The optional PIN is stored using platform secure storage; biometrics use the device’s authentication system.
+
+Built-in backup and restore, multi-user access, barcode scanning, supplier management, and tax features are outside v1. Keep a separate copy of important business records.
+
+## Run locally
+
+Install Flutter with the Dart SDK version required by [`pubspec.yaml`](pubspec.yaml), then run:
+
+```sh
+flutter pub get
+flutter run
+```
+
+## Tech stack
+
+- Flutter and Dart
+- Riverpod for application state
+- `go_router` for navigation
+- Drift and SQLite for local persistence
+- `local_auth` and `flutter_secure_storage` for optional app locking
+- `image_picker` for product photos
+- `share_plus` for sharing CSV reports
 
 ## Project structure
 
@@ -20,62 +82,4 @@ lib/
 └── main.dart
 ```
 
-Feature code is organized into `data/`, `domain/`, and `presentation/` as it is implemented. Shared concerns live under `core/`.
-
-The app uses `go_router` for tab navigation and Riverpod for dependency and UI state management.
-
-## Development roadmap
-
-### Phase 1 — Foundation
-- [x] Create the Flutter project and install dependencies.
-- [x] Implement the app theme and reusable UI components.
-- [x] Build the main navigation and placeholder screens.
-- [x] Configure routing and state management.
-
-### Phase 2 — Local Database
-- [x] Configure SQLite and Drift.
-- [x] Define product, sale, sale-item, expense, payment, and inventory-movement tables.
-- [x] Implement database migrations and transaction handling.
-- [x] Add tests for core accounting calculations.
-
-### Phase 3 — Core Features
-- [x] Implement product management.
-- [x] Implement inventory tracking and stock adjustments.
-- [x] Implement sales recording and payment tracking.
-- [x] Implement expense management.
-- [x] Implement notes.
-
-### Phase 4 — Dashboard and Reports
-- [x] Calculate daily sales, costs, gross profit, expenses, and net profit.
-- [x] Add charts and date-range filters.
-- [x] Implement low-stock alerts.
-- [x] Add CSV export.
-
-### Phase 5 — Security and Reliability
-- [x] Add optional app locking.
-- [ ] Implement backup and restore.
-- [ ] Add input validation and error handling.
-- [ ] Test transaction integrity and historical calculations.
-- [ ] Add widget and integration tests.
-
-### Phase 6 — Release Preparation
-- [ ] Test on supported devices.
-- [ ] Improve accessibility and performance.
-- [ ] Prepare application icons and release assets.
-- [ ] Build and verify release packages.
-
-## Product scope
-
-- No account or internet connection is required for the initial release.
-- Use integer minor currency units for financial calculations; default display currency is KES and should become configurable.
-- Keep historical sale prices and costs so later product edits do not rewrite past profit.
-- Product photos are resized before being stored privately on the device.
-- Profit is a management estimate from recorded transactions, not statutory accounting or tax advice.
-- Cloud sync, multiple users, barcode scanning, suppliers, and tax features are future options, not MVP requirements.
-
-## Run
-
-```sh
-flutter pub get
-flutter run
-```
+Feature code is organized into `data/`, `domain/`, and `presentation/`; shared concerns live under `core/`.
