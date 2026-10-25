@@ -162,7 +162,7 @@ class _SettingsPageState extends State<SettingsPage> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             const Text(
-              'Made with love by ',
+              'Made with love ❤️ by ',
               style: TextStyle(color: AppColors.muted, fontSize: 10),
             ),
             Semantics(
